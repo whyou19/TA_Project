@@ -9,6 +9,7 @@
         .bg-biotech { background-color: #198754; }
         .text-biotech { color: #198754; }
     </style>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-biotech shadow-sm">
@@ -36,10 +37,38 @@
             </div>
 
             <div class="col-md-6">
-                <div class="card shadow p-4 text-center border-0 rounded-4">
-                    <h4 class="mb-4 text-secondary">Pilih Metode Input Citra</h4>
-                    
-                  <form action="/" method="POST" enctype="multipart/form-data">
+                <div class="upload-container">
+    <h2>Unggah Citra Elektroforesis</h2>
+    
+    <form action="/" method="POST" enctype="multipart/form-data" id="uploadForm">
+        
+        <div id="drop-zone" class="drop-zone">
+            <div class="icon">📁</div>
+            <p id="drop-text">Tarik & lepaskan citra gel di sini, atau <strong>klik untuk memilih file</strong></p>
+            <input type="file" name="file" id="file-input" accept="image/*" class="hidden-input">
+        </div>
+
+        <div class="camera-section">
+            <label for="camera-input" class="btn-camera">📸 Ambil Foto Langsung</label>
+            <input type="file" name="camera_file" id="camera-input" accept="image/*" capture="environment" class="hidden-input">
+        </div>
+
+        <div id="preview-container" class="preview-container" style="display: none;">
+            <p>Preview Gambar:</p>
+            <img id="image-preview" src="" alt="Preview">
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn-submit" disabled>Analisis Kualitas DNA</button>
+    </form>
+    <div id="loading-container" class="loading-container" style="display: none;">
+    <div class="spinner"></div>
+    <p class="loading-text">Sedang menganalisis pita DNA...</p>
+    <p class="loading-subtext">Mengekstraksi bounding box dan menilai kelayakan sampel. Mohon tunggu sebentar.</p>
+</div>
+</div>
+                <!-- <div class="card shadow p-4 text-center border-0 rounded-4">
+                    <h4 class="mb-4 text-secondary">Pilih Metode Input Citra</h4>    
+                    <form action="/" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="file" class="form-label fw-bold">1. Unggah dari Galeri/Komputer</label>
                             <input class="form-control form-control-lg" type="file" id="file" name="file" accept=".jpg,.jpeg,.png">
@@ -50,16 +79,99 @@
                         </div>
 
                         <div class="mb-4">
-        <label for="camera_file" class="form-label fw-bold">2. Ambil Foto Langsung (Khusus HP)</label>
-        <input class="form-control form-control-lg" type="file" id="camera_file" name="camera_file" accept="image/*" capture="environment">
-    </div>
+                            <label for="camera_file" class="form-label fw-bold">2. Ambil Foto Langsung (Khusus HP)</label>
+                            <input class="form-control form-control-lg" type="file" id="camera_file" name="camera_file" accept="image/*" capture="environment">
+                        </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">Analisis Kualitas DNA</button>
                     </form>
-                </div>
+                </div> -->
             </div>
 
         </div>
     </div>
+    <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const cameraInput = document.getElementById('camera-input');
+    const previewContainer = document.getElementById('preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const submitBtn = document.getElementById('submit-btn');
+    const dropText = document.getElementById('drop-text');
+
+    // Fungsi untuk memproses dan menampilkan preview gambar
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Validasi apakah file berupa gambar
+            if (file.type.startsWith('image/')) {
+                // Buat URL sementara untuk preview gambar
+                imagePreview.src = URL.createObjectURL(file);
+                previewContainer.style.display = 'block';
+                submitBtn.disabled = false; // Aktifkan tombol analisis
+                dropText.innerHTML = `File terpilih: <strong>${file.name}</strong>`;
+            } else {
+                alert('Tolong unggah file berupa gambar!');
+            }
+        }
+    }
+
+    // --- LOGIKA KLIK AREA ---
+    // Jika drop-zone diklik, trigger input file yang tersembunyi
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // --- LOGIKA DRAG & DROP ---
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Mencegah browser membuka gambar di tab baru
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        // Masukkan file hasil drag ke dalam input file agar terkirim ke Flask
+        fileInput.files = files; 
+        handleFiles(files);
+    });
+
+    // --- LOGIKA PERUBAHAN INPUT (Klik file & Kamera) ---
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    cameraInput.addEventListener('change', function() {
+        handleFiles(this.files);
+        // Hapus file di input standar agar Flask tidak bingung ada 2 file
+        fileInput.value = ''; 
+    });
+    
+    // Ambil elemen form dan loading
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingContainer = document.getElementById('loading-container');
+
+    // Event listener saat tombol Analisis ditekan
+    uploadForm.addEventListener('submit', function(e) {
+        // 1. Sembunyikan seluruh area drop zone, preview, dan tombol
+        dropZone.style.display = 'none';
+        previewContainer.style.display = 'none';
+        submitBtn.style.display = 'none';
+        
+        // Catatan: Jika ada tombol kamera, sembunyikan juga
+        const cameraSection = document.querySelector('.camera-section');
+        if (cameraSection) cameraSection.style.display = 'none';
+
+        // 2. Tampilkan animasi loading
+        loadingContainer.style.display = 'block';
+        
+        // Form akan tetap melanjutkan proses POST ke Flask secara otomatis di latar belakang
+    });
+</script>
 </body>
 </html>

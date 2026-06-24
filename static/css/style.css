@@ -1,0 +1,117 @@
+/* Styling Container Utama */
+.upload-container {
+    max-width: 600px;
+    margin: 40px auto;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+/* Styling Area Drag & Drop */
+.drop-zone {
+    border: 2px dashed #007bff; /* Warna biru profesional */
+    border-radius: 10px;
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+    margin-bottom: 20px;
+}
+
+/* Efek saat file diseret di atas area */
+.drop-zone.dragover {
+    background-color: #e2e6ea;
+    border-color: #28a745; /* Berubah hijau saat file di-drag */
+}
+
+.drop-zone .icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+/* Sembunyikan input asli */
+.hidden-input {
+    display: none;
+}
+
+/* Styling Tombol */
+.btn-camera, .btn-submit {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+.btn-camera {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-submit {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    font-size: 16px;
+}
+
+.btn-submit:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Styling Preview */
+.preview-container {
+    margin-bottom: 20px;
+}
+
+#image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Styling Container Loading */
+.loading-container {
+    text-align: center;
+    margin-top: 20px;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Animasi Spinner Putar */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e2e6ea; /* Warna dasar cincin */
+    border-top: 5px solid #007bff; /* Warna biru berputar */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px auto;
+}
+
+/* Keyframes untuk logika putaran 360 derajat */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Styling Teks Loading */
+.loading-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.loading-subtext {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
