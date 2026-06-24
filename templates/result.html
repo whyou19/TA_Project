@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Analisis DNA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bg-biotech { background-color: #198754; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-biotech shadow-sm">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 fw-bold">BioTech | Hasil Analisis</span>
+            <a href="/" class="btn btn-outline-light btn-sm">Kembali ke Beranda</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        
+        <div class="row mb-5">
+            <div class="col-md-6 text-center mb-3">
+                <h5 class="text-secondary fw-bold">Citra Input Asli</h5>
+                <img src="{{ url_for('static', filename='uploads/' + original_image) }}" class="img-fluid rounded shadow border">
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5 class="text-success fw-bold">Deteksi Spasial YOLOv11</h5>
+                <img src="{{ url_for('static', filename='results/' + result_image) }}" class="img-fluid rounded shadow border">
+            </div>
+            <div class="card shadow-sm border-0 border-start border-4 border-info mb-5">
+            <div class="card-body bg-white rounded">
+                <h5 class="fw-bold text-info mb-3">📋 Keterangan Visual AI</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <span class="badge me-2 text-wrap" style="background-color: #64ff64; color: #000; width: 40px;">S1|</span> 
+                                <strong>Nomor & Garis Penunjuk:</strong> Urutan sumur dengan garis yang menunjukkan area analisis jalur tersebut (S1 = Sampel 1).
+                            </li>
+                            <li class="mb-3">
+                                <span class="badge border me-2 text-wrap" style="background-color: transparent; border-color: #ffffff !important; color: #000; width: 40px;">wll</span> 
+                                <strong>Sumur (Putih):</strong> Area awal tempat sampel DNA dipipet.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <span class="badge border me-2 text-wrap" style="background-color: transparent; border-color: #00ffff !important; color: #000; width: 40px;">bnd</span> 
+                                <strong>Pita (Biru Terang):</strong> Area yang menunjukkan DNA utama berhasil bermigrasi.
+                            </li>
+                            <li class="mb-3">
+                                <span class="badge border me-2 text-wrap" style="background-color: transparent; border-color: #ff0000 !important; color: #000; width: 40px;">smr</span> 
+                                <strong>Smear (Merah):</strong> Area pendaran bayangan (degradasi DNA).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        </div>
+
+        <hr>
+
+        <h3 class="mb-4 fw-bold">Laporan Kelayakan Per Jalur (Lane)</h3>
+        <div class="table-responsive shadow-sm rounded mb-5">
+    <table class="table table-hover table-bordered text-center align-middle bg-white mb-0">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" style="width: 30%;">Jenis Klasifikasi</th>
+                <th scope="col" style="width: 50%;">Sampel Terdeteksi</th>
+                <th scope="col" style="width: 20%;">Detail Diagnosis</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for status, data in analisis.items() %}
+            <tr>
+                <td>
+                    <span class="badge bg-{{ data.tipe }} px-3 py-2 fs-6">{{ status }}</span>
+                </td>
+                <td class="fw-bold text-secondary">
+                    {{ data.daftar_sampel | join(', ') }}
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalDetail{{ loop.index }}">
+                        <i class="bi bi-info-circle"></i> Lihat Detail
+                    </button>
+                </td>
+            </tr>
+
+            <div class="modal fade text-start" id="modalDetail{{ loop.index }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                  <div class="modal-header bg-{{ data.tipe }} text-white">
+                    <h5 class="modal-title fw-bold">Detail Klasifikasi: {{ status }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-muted mb-1">Daftar Sampel:</h6>
+                        <p class="fw-bold fs-5">{{ data.daftar_sampel | join(', ') }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-muted mb-1">Kondisi Fisik Gel:</h6>
+                        <p class="mb-0">{{ data.penjelasan }}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-muted mb-1">Indikasi Penyebab:</h6>
+                        <p class="mb-0">{{ data.penyebab }}</p>
+                    </div>
+                    <div class="alert alert-{{ data.tipe }} mb-0 border-start border-4 border-{{ data.tipe }}">
+                        <h6 class="fw-bold mb-1">Tindakan Laboratorium:</h6>
+                        <p class="mb-0">{{ data.tindakan }}</p>
+                    </div>
+                  </div>
+                  <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    </div>
+</body>
+</html>

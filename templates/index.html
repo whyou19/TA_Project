@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Uji Kualitas DNA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bg-biotech { background-color: #198754; }
+        .text-biotech { color: #198754; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-biotech shadow-sm">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 fw-bold">BioTech | Analisis Gel Elektroforesis</span>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row align-items-center">
+            
+            <div class="col-md-6 mb-4">
+                <h2 class="text-biotech fw-bold mb-3">Panduan Penggunaan</h2>
+                <div class="card shadow-sm border-0 border-start border-5 border-success">
+                    <div class="card-body">
+                        <p>Sistem ini ditenagai AI YOLOv11 untuk membantu laboran dan mahasiswa mengevaluasi kualitas sampel DNA pra-PCR.</p>
+                        <ol class="text-muted">
+                            <li class="mb-2">Pastikan gel agarose diletakkan dengan rata di atas <i>UV Transilluminator</i>.</li>
+                            <li class="mb-2">Ambil foto dari sudut tegak lurus (90 derajat) agar mesin dapat menarik garis lurus dari sumur ke pita.</li>
+                            <li class="mb-2">Hindari pantulan cahaya ruangan (silau) yang berlebihan pada permukaan gel.</li>
+                            <li>Pilih menu <b>Ambil Foto Langsung</b> (jika menggunakan HP) atau <b>Unggah File</b> dari galeri.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow p-4 text-center border-0 rounded-4">
+                    <h4 class="mb-4 text-secondary">Pilih Metode Input Citra</h4>
+                    
+                  <form action="/" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label fw-bold">1. Unggah dari Galeri/Komputer</label>
+                            <input class="form-control form-control-lg" type="file" id="file" name="file" accept=".jpg,.jpeg,.png">
+                        </div>
+
+                        <div class="text-center my-3">
+                            <span class="text-muted">--- ATAU ---</span>
+                        </div>
+
+                        <div class="mb-4">
+        <label for="camera_file" class="form-label fw-bold">2. Ambil Foto Langsung (Khusus HP)</label>
+        <input class="form-control form-control-lg" type="file" id="camera_file" name="camera_file" accept="image/*" capture="environment">
+    </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">Analisis Kualitas DNA</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
