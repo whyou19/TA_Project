@@ -118,21 +118,46 @@ def klasifikasi_per_jalur(results, img_raw):
 
             if ada_bnd and not ada_smr:
                 status, tipe = "Layak (Murni)", "success"
-                penjelasan, penyebab, tindakan = "Pita DNA bermigrasi sempurna.", "Ekstraksi berhasil, tidak ada aktivitas nuclease.", "Sangat aman dilanjutkan ke tahap PCR."
+                penjelasan = "Pita DNA terlihat sangat jelas, utuh, dan tidak memiliki bayangan kotor."
+                penyebab = "Proses pengambilan sampel berhasil dengan baik dan kualitas struktur DNA benar-benar terjaga (tidak mengalami kerusakan)."
+                tindakan = "Sangat aman dilanjutkan ke tahap PCR."
             elif ada_bnd and ada_smr:
                 status, tipe = "Layak (Degradasi)", "warning"
-                penjelasan, penyebab, tindakan = "Pita utama terdeteksi, namun disertai jejak pendaran.", "Degradasi minor atau overloading.", "Masih dapat dilanjutkan ke PCR. Pertimbangkan pengenceran."
+                penjelasan = "Pita utama terdeteksi, namun disertai sedikit jejak pendaran (bayangan noda) di bawahnya."
+                penyebab = "Terdapat sedikit kerusakan ringan pada DNA, atau bisa juga karena takaran sampel yang dimasukkan ke dalam sumur terlalu banyak."
+                tindakan = "Masih dapat dilanjutkan ke PCR. Pertimbangkan pengenceran."
             elif not ada_bnd and ada_smr:
                 status, tipe = "Tidak Layak (Degradasi)", "danger"
-                penjelasan, penyebab, tindakan = "Hanya ditemukan pendaran jejak DNA hancur.", "DNA terdegradasi parah oleh enzim DNase.", "JANGAN dilanjutkan ke PCR. Ulangi ekstraksi."
+                penjelasan = "Hanya ditemukan bayangan pendaran (smear) dari sisa-sisa DNA yang hancur tanpa adanya pita utama."
+                penyebab = "DNA telah rusak parah. Hal ini umumnya terjadi karena suhu penyimpanan yang kurang tepat, kontaminasi, atau proses ekstraksi yang gagal."
+                tindakan = "JANGAN dilanjutkan ke PCR. Ulangi proses ekstraksi sampel."
             else:
                 status, tipe = "Sumur Kosong", "secondary"
-                penjelasan, penyebab, tindakan = "Tidak ada objek DNA.", "Sumur sengaja dikosongkan (blank).", "Abaikan jalur ini."
+                penjelasan = "Tidak ada objek DNA yang terdeteksi di jalur ini."
+                penyebab = "Sumur memang sengaja dikosongkan (blank) atau sampel gagal masuk."
+                tindakan = "Abaikan jalur ini."
 
             hasil_analisis.append({
-                'sampel': label_gambar, # Menghasilkan 'S1', 'S2', dst
+                'sampel': label_gambar,
                 'status': status, 'tipe': tipe, 
                 'penjelasan': penjelasan, 'penyebab': penyebab, 'tindakan': tindakan
+            # if ada_bnd and not ada_smr:
+            #     status, tipe = "Layak (Murni)", "success"
+            #     penjelasan, penyebab, tindakan = "Pita DNA bermigrasi sempurna.", "Ekstraksi berhasil, tidak ada aktivitas nuclease.", "Sangat aman dilanjutkan ke tahap PCR."
+            # elif ada_bnd and ada_smr:
+            #     status, tipe = "Layak (Degradasi)", "warning"
+            #     penjelasan, penyebab, tindakan = "Pita utama terdeteksi, namun disertai jejak pendaran.", "Degradasi minor atau overloading.", "Masih dapat dilanjutkan ke PCR. Pertimbangkan pengenceran."
+            # elif not ada_bnd and ada_smr:
+            #     status, tipe = "Tidak Layak (Degradasi)", "danger"
+            #     penjelasan, penyebab, tindakan = "Hanya ditemukan pendaran jejak DNA hancur.", "DNA terdegradasi parah oleh enzim DNase.", "JANGAN dilanjutkan ke PCR. Ulangi ekstraksi."
+            # else:
+            #     status, tipe = "Sumur Kosong", "secondary"
+            #     penjelasan, penyebab, tindakan = "Tidak ada objek DNA.", "Sumur sengaja dikosongkan (blank).", "Abaikan jalur ini."
+
+            # hasil_analisis.append({
+            #     'sampel': label_gambar, # Menghasilkan 'S1', 'S2', dst
+            #     'status': status, 'tipe': tipe, 
+            #     'penjelasan': penjelasan, 'penyebab': penyebab, 'tindakan': tindakan
             })
 
     # 2. ALGORITMA PENGELOMPOKAN (GROUPING) BERDASARKAN STATUS
