@@ -22,24 +22,34 @@ def klasifikasi_per_jalur(results, img_raw):
     if len(boxes) == 0:
         return [], img_draw
 
+    # --- PERBAIKAN: FITUR SKALA DINAMIS ---
+    h, w = img_draw.shape[:2]
+    # Menyesuaikan ketebalan garis dan font secara proporsional dengan lebar gambar
+    ketebalan_garis = max(1, int(w / 400))
+    skala_font = max(0.4, w / 1500)
+    ketebalan_font = max(1, int(w / 600))
+    
+    # Menyesuaikan jarak teks S1, S2 agar tidak saling bertumpuk di resolusi tinggi
+    jarak_label = max(40, int(h * 0.05))
+    offset_zigzag = int(jarak_label * 0.4)
+    # --------------------------------------
+
     wells = []
     bands = []
     smears = []
 
     # KAMUS WARNA (Format BGR di OpenCV)
-    # wll = Putih, bnd = Biru Terang (Cyan), smr = Merah
     warna_objek = {
         'wll': (255, 255, 255), 
         'bnd': (255, 255, 0),   
         'smr': (0, 0, 255)      
     }
 
-    # 1. GAMBAR KOTAK (Ketebalan 1 piksel, Tanpa Teks YOLO)
+    # 1. GAMBAR KOTAK
     for box in boxes:
         cls_name = results.names[int(box.cls)]
         x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
         
-        # Ekstrak data untuk logika biologi
         center_x = (x1 + x2) / 2
         center_y = (y1 + y2) / 2
         width = x2 - x1
@@ -52,9 +62,9 @@ def klasifikasi_per_jalur(results, img_raw):
         elif cls_name == 'smr':
             smears.append(obj_data)
 
-        # Gambar kotak di OpenCV
+        # Gambar kotak dengan ketebalan dinamis
         color = warna_objek.get(cls_name, (0, 255, 0))
-        cv2.rectangle(img_draw, (x1, y1), (x2, y2), color, 1)
+        cv2.rectangle(img_draw, (x1, y1), (x2, y2), color, ketebalan_garis)
 
     # 2. ALGORITMA PENGURUTAN MULTI-BARIS (Y lalu X)
     wells = sorted(wells, key=lambda w: w['cy'])
@@ -69,11 +79,9 @@ def klasifikasi_per_jalur(results, img_raw):
                 baris_saat_ini = [w]
         baris_gel.append(baris_saat_ini)
 
-    # PERBAIKAN BUG: Pastikan setiap baris murni diurutkan dari Kiri ke Kanan (Sumbu X)
     for idx in range(len(baris_gel)):
         baris_gel[idx] = sorted(baris_gel[idx], key=lambda w: w['cx'])
 
-    # Buat daftar urutan global untuk penamaan yang rapi (S1, S2, S3...)
     sumur_terurut = []
     for baris in baris_gel:
         sumur_terurut.extend(baris)
@@ -82,33 +90,30 @@ def klasifikasi_per_jalur(results, img_raw):
 
     # 3. ANALISIS LOGIKA DAN GAMBAR TEKS
     for baris in baris_gel:
-        # Cari posisi tertinggi dari kumpulan sumur di baris ini untuk menaruh label rata sejajar
         y_puncak_baris = min([int(w['y1']) for w in baris])
-        batas_atas_label = y_puncak_baris - 40
+        batas_atas_label = y_puncak_baris - jarak_label
         if batas_atas_label < 20: 
             batas_atas_label = 20
 
         for indeks_lokal, well in enumerate(baris):
             i = sumur_terurut.index(well)
-            nama_sampel = f"Sampel {i + 1}"
             label_gambar = f"S{i + 1}"
             
             cx = int(well['cx'])
             y1_well = int(well['y1'])
 
-            # Trik Zig-zag vertikal skala kecil
-            offset_y = 0 if indeks_lokal % 2 == 0 else -15
+            # Offset Zig-zag vertikal yang menyesuaikan skala gambar
+            offset_y = 0 if indeks_lokal % 2 == 0 else -offset_zigzag
             posisi_y_teks = batas_atas_label + offset_y
             
-            # 3A. Tarik garis lurus tipis kehijauan
-            cv2.line(img_draw, (cx, posisi_y_teks + 5), (cx, y1_well), (100, 255, 100), 1)
+            # Tarik garis dan gambar teks menggunakan skala dinamis
+            cv2.line(img_draw, (cx, posisi_y_teks + int(jarak_label * 0.1)), (cx, y1_well), (100, 255, 100), ketebalan_garis)
 
-            # 3B. Gambar Teks S1, S2 di tengah garis
-            (text_width, _), _ = cv2.getTextSize(label_gambar, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
+            (text_width, _), _ = cv2.getTextSize(label_gambar, cv2.FONT_HERSHEY_SIMPLEX, skala_font, ketebalan_font)
             posisi_x_teks = cx - (text_width // 2)
-            cv2.putText(img_draw, label_gambar, (posisi_x_teks, posisi_y_teks), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (100, 255, 100), 1)
+            cv2.putText(img_draw, label_gambar, (posisi_x_teks, posisi_y_teks), cv2.FONT_HERSHEY_SIMPLEX, skala_font, (100, 255, 100), ketebalan_font)
 
-            # 4. TERAPKAN LOGIKA BIOLOGIS
+            # 4. TERAPKAN LOGIKA BIOLOGIS (Menggunakan teks umum terbaru)
             batas_kiri = well['cx'] - (well['w'] * 0.75)
             batas_kanan = well['cx'] + (well['w'] * 0.75)
             batas_atas = well['cy'] 
@@ -123,13 +128,13 @@ def klasifikasi_per_jalur(results, img_raw):
                 tindakan = "Sangat aman dilanjutkan ke tahap PCR."
             elif ada_bnd and ada_smr:
                 status, tipe = "Layak (Degradasi)", "warning"
-                penjelasan = "Pita utama terdeteksi, namun disertai sedikit smear (bayangan noda) di bawahnya."
-                penyebab = "Terdapat sedikit kerusakan pada DNA (protokol ekstraksi DNA dan penyimpanan DNA), bisa juga karena takaran sampel yang dimasukkan ke dalam sumur terlalu banyak."
+                penjelasan = "Pita utama terdeteksi, namun disertai sedikit jejak pendaran (bayangan noda) di bawahnya."
+                penyebab = "Terdapat sedikit kerusakan ringan pada DNA, atau bisa juga karena takaran sampel yang dimasukkan ke dalam sumur terlalu banyak."
                 tindakan = "Masih dapat dilanjutkan ke PCR. Pertimbangkan pengenceran."
             elif not ada_bnd and ada_smr:
                 status, tipe = "Tidak Layak (Degradasi)", "danger"
                 penjelasan = "Hanya ditemukan bayangan pendaran (smear) dari sisa-sisa DNA yang hancur tanpa adanya pita utama."
-                penyebab = "DNA telah rusak parah. Hal ini umumnya terjadi karena suhu penyimpanan yang kurang tepat, kontaminasi, dan proses ekstraksi DNA yang gagal."
+                penyebab = "DNA telah rusak parah. Hal ini umumnya terjadi karena suhu penyimpanan yang kurang tepat, kontaminasi, atau proses ekstraksi yang gagal."
                 tindakan = "JANGAN dilanjutkan ke PCR. Ulangi proses ekstraksi sampel."
             else:
                 status, tipe = "Sumur Kosong", "secondary"
@@ -141,26 +146,9 @@ def klasifikasi_per_jalur(results, img_raw):
                 'sampel': label_gambar,
                 'status': status, 'tipe': tipe, 
                 'penjelasan': penjelasan, 'penyebab': penyebab, 'tindakan': tindakan
-            # if ada_bnd and not ada_smr:
-            #     status, tipe = "Layak (Murni)", "success"
-            #     penjelasan, penyebab, tindakan = "Pita DNA bermigrasi sempurna.", "Ekstraksi berhasil, tidak ada aktivitas nuclease.", "Sangat aman dilanjutkan ke tahap PCR."
-            # elif ada_bnd and ada_smr:
-            #     status, tipe = "Layak (Degradasi)", "warning"
-            #     penjelasan, penyebab, tindakan = "Pita utama terdeteksi, namun disertai jejak pendaran.", "Degradasi minor atau overloading.", "Masih dapat dilanjutkan ke PCR. Pertimbangkan pengenceran."
-            # elif not ada_bnd and ada_smr:
-            #     status, tipe = "Tidak Layak (Degradasi)", "danger"
-            #     penjelasan, penyebab, tindakan = "Hanya ditemukan pendaran jejak DNA hancur.", "DNA terdegradasi parah oleh enzim DNase.", "JANGAN dilanjutkan ke PCR. Ulangi ekstraksi."
-            # else:
-            #     status, tipe = "Sumur Kosong", "secondary"
-            #     penjelasan, penyebab, tindakan = "Tidak ada objek DNA.", "Sumur sengaja dikosongkan (blank).", "Abaikan jalur ini."
-
-            # hasil_analisis.append({
-            #     'sampel': label_gambar, # Menghasilkan 'S1', 'S2', dst
-            #     'status': status, 'tipe': tipe, 
-            #     'penjelasan': penjelasan, 'penyebab': penyebab, 'tindakan': tindakan
             })
 
-    # 2. ALGORITMA PENGELOMPOKAN (GROUPING) BERDASARKAN STATUS
+    # 5. ALGORITMA PENGELOMPOKAN (GROUPING) BERDASARKAN STATUS
     ringkasan_kelas = {}
     for item in hasil_analisis:
         s = item['status']
@@ -172,14 +160,10 @@ def klasifikasi_per_jalur(results, img_raw):
                 'penyebab': item['penyebab'],
                 'tindakan': item['tindakan']
             }
-        # Masukkan nama sampel (S1, S2) ke dalam kelas yang sesuai
         ringkasan_kelas[s]['daftar_sampel'].append(item['sampel'])
 
-    # Kembalikan ringkasan_kelas (berupa Dictionary) dan gambarnya
     return ringkasan_kelas, img_draw
-
     
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
