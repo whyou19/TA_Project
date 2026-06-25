@@ -123,13 +123,13 @@ def klasifikasi_per_jalur(results, img_raw):
                 tindakan = "Sangat aman dilanjutkan ke tahap PCR."
             elif ada_bnd and ada_smr:
                 status, tipe = "Layak (Degradasi)", "warning"
-                penjelasan = "Pita utama terdeteksi, namun disertai sedikit jejak pendaran (bayangan noda) di bawahnya."
-                penyebab = "Terdapat sedikit kerusakan ringan pada DNA, atau bisa juga karena takaran sampel yang dimasukkan ke dalam sumur terlalu banyak."
+                penjelasan = "Pita utama terdeteksi, namun disertai sedikit smear (bayangan noda) di bawahnya."
+                penyebab = "Terdapat sedikit kerusakan pada DNA (protokol ekstraksi DNA dan penyimpanan DNA), bisa juga karena takaran sampel yang dimasukkan ke dalam sumur terlalu banyak."
                 tindakan = "Masih dapat dilanjutkan ke PCR. Pertimbangkan pengenceran."
             elif not ada_bnd and ada_smr:
                 status, tipe = "Tidak Layak (Degradasi)", "danger"
                 penjelasan = "Hanya ditemukan bayangan pendaran (smear) dari sisa-sisa DNA yang hancur tanpa adanya pita utama."
-                penyebab = "DNA telah rusak parah. Hal ini umumnya terjadi karena suhu penyimpanan yang kurang tepat, kontaminasi, atau proses ekstraksi yang gagal."
+                penyebab = "DNA telah rusak parah. Hal ini umumnya terjadi karena suhu penyimpanan yang kurang tepat, kontaminasi, dan proses ekstraksi DNA yang gagal."
                 tindakan = "JANGAN dilanjutkan ke PCR. Ulangi proses ekstraksi sampel."
             else:
                 status, tipe = "Sumur Kosong", "secondary"
