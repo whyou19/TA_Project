@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasil Analisis DNA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         .bg-biotech { background-color: #198754; }
     </style>
@@ -21,50 +20,25 @@
     <div class="container mt-4 mb-5">
         
         <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <div class="d-inline-flex align-items-center bg-white border rounded-pill shadow-sm px-4 py-2">
+                    <span class="fw-bold text-muted me-2">File yang dianalisis:</span>
+                    <span class="text-success fw-bold">{{ original_image }}</span>
+                </div>
+            </div>
+
             <div class="col-md-6 text-center mb-3">
-                <h5 class="text-secondary fw-bold">Citra Input Asli</h5>
-                <img src="{{ url_for('static', filename='uploads/' + original_image) }}" class="img-fluid rounded shadow border" style="cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#modalZoomAsli" title="Klik untuk memperbesar">
-                <p class="text-muted small mt-1"><i class="bi bi-zoom-in"></i> Klik gambar untuk memperbesar</p>
+                <h5 class="text-secondary fw-bold mb-3">Citra Input Asli</h5>
+                <img src="{{ url_for('static', filename='uploads/' + original_image) }}" class="img-fluid rounded shadow border" alt="Gambar Asli">
             </div>
             
             <div class="col-md-6 text-center mb-3">
-                <h5 class="text-success fw-bold">Deteksi Spasial YOLOv11</h5>
-                <img src="{{ url_for('static', filename='results/' + result_image) }}" class="img-fluid rounded shadow border" style="cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#modalZoomYolo" title="Klik untuk memperbesar">
-                <p class="text-muted small mt-1"><i class="bi bi-zoom-in"></i> Klik gambar untuk memperbesar</p>
+                <h5 class="text-success fw-bold mb-3">Deteksi Spasial YOLOv11</h5>
+                <img src="{{ url_for('static', filename='results/' + result_image) }}" class="img-fluid rounded shadow border" alt="Gambar Hasil YOLO">
             </div>
 
-            <div class="modal fade" id="modalZoomAsli" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header border-0 pb-0 justify-content-end">
-                            <button type="button" class="btn btn-outline-dark btn-sm fw-bold" data-bs-dismiss="modal">
-                                <span aria-hidden="true" style="font-size: 1.2rem; line-height: 1;">&times;</span> Tutup
-                            </button>
-                        </div>
-                        <div class="modal-body text-center p-3">
-                            <img src="{{ url_for('static', filename='uploads/' + original_image) }}" class="img-fluid rounded" style="max-height: 85vh;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="modalZoomYolo" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header border-0 pb-0 justify-content-end">
-                            <button type="button" class="btn btn-outline-dark btn-sm fw-bold" data-bs-dismiss="modal">
-                                <span aria-hidden="true" style="font-size: 1.2rem; line-height: 1;">&times;</span> Tutup
-                            </button>
-                        </div>
-                        <div class="modal-body text-center p-3">
-                            <img src="{{ url_for('static', filename='results/' + result_image) }}" class="img-fluid rounded" style="max-height: 85vh;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 mt-3">
-                <div class="card shadow-sm border-0 border-start border-4 border-info mb-5">
+            <div class="col-12 mt-4">
+                <div class="card shadow-sm border-0 border-start border-4 border-info">
                     <div class="card-body bg-white rounded">
                         <h5 class="fw-bold text-info mb-3">📋 Keterangan Visual AI</h5>
                         <div class="row">
@@ -121,7 +95,7 @@
                         </td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalDetail{{ loop.index }}">
-                                <i class="bi bi-info-circle"></i> Lihat Detail
+                                Lihat Detail
                             </button>
                         </td>
                     </tr>
